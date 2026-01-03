@@ -2,140 +2,113 @@
 
 # ⚡ NetPulse
 
-> A modern, high-performance CLI tool for website health monitoring built with Go.
+> A modern, high-performance CLI to check website availability and latency in real time.
 
-![Go Version](https://img.shields.io/badge/Go-1.22+-00ADD8?style=flat\&logo=go)
+![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat\&logo=go)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 
 ---
 
 ## 📖 About
 
-**NetPulse** is a command-line interface (CLI) tool designed to check the availability and latency of websites in real time.
-Built with performance in mind, it leverages Go’s native concurrency model to process large volumes of URLs simultaneously, rendering results in a clean and structured terminal UI.
-
-This project demonstrates practical usage of:
-
-* **Goroutines**
-* **Channels**
-* **Fan-In concurrency patterns**
-* **Clean Architecture principles**
+NetPulse runs quick health checks against URLs, sorts results by latency, and renders a compact terminal table with status badges. It leans on Go’s concurrency (goroutines + channels) to process many targets at once while keeping a simple CLI surface.
 
 ---
 
 ## ✨ Features
 
-* 🚀 **High Concurrency**
-  Checks hundreds of websites in parallel using worker pools.
-
-* 🎨 **Modern UI**
-  Beautiful terminal output with tables and status badges (powered by **Lipgloss**).
-
-* 📊 **Detailed Metrics**
-  Displays HTTP status codes, latency, and error details.
-
-* 📂 **Bulk Processing**
-  Supports loading target URLs from CSV files.
-
-* 🛡️ **Reliable**
-  Configurable timeouts and robust error handling.
+* 🚀 Concurrency-first worker model for fast batches of URLs
+* 🎨 Colored, table-based TUI powered by Lipgloss
+* 📊 HTTP status, latency, and error surfacing
+* 📂 CSV input for bulk checks
+* 🛡️ Configurable request timeout per run
 
 ---
 
 ## 🛠️ Tech Stack
 
-* **Language:** Golang
-* **CLI Framework:** [Cobra](https://github.com/spf13/cobra) & [Viper](https://github.com/spf13/viper)
-* **UI / TUI:** [Lipgloss](https://github.com/charmbracelet/lipgloss)
-* **Testing:** [Testify](https://github.com/stretchr/testify)
+* Go 1.25+
+* Cobra (CLI) + Viper (config-ready)
+* Lipgloss (terminal styling)
+* Testify (testing)
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
-### Prerequisites
-
-* Go **1.22+**
-
-### Installation
-
-```
-git clone https://github.com/seu-usuario/netpulse.git
+```bash
+git clone https://github.com/dcastro0/netpulse.git
 cd netpulse
 go mod tidy
-```
-
-### Build
-
-```
 make build
 ```
 
-The binary will be generated in the `bin/` directory.
+The binary is written to `bin/netpulse`.
 
 ---
 
 ## 💻 Usage
 
-### Check a Single URL
+Check a single URL:
 
-```
+```bash
 ./bin/netpulse check https://google.com
 ```
 
-### Check Multiple URLs (via CSV)
+Check from a CSV (one URL per line):
 
-Create a `websites.csv` file containing one URL per line:
-
-```
+```bash
 ./bin/netpulse check --file websites.csv
 ```
 
-### Output Example
+Tune timeout (seconds, default 5):
+
+```bash
+./bin/netpulse check https://example.com --timeout 8
+```
+
+### Flags
+
+* `--file`, `-f` — Path to CSV with URLs
+* `--timeout`, `-t` — Request timeout in seconds (default: 5)
+
+### Sample Output
 
 ```
-STATUS  URL                      LATÊNCIA
-🟢 200  https://google.com        240ms
-🔴 500  https://broken-api.com     45ms
-🟡 403  https://protected.com     110ms
+STATUS     URL                       LATÊNCIA
+🟢 200     https://google.com        240ms
+🔴 ERROR   https://broken-api.com    45ms
+🟡 403     https://protected.com     110ms
 ```
 
 ---
 
-## 🧪 Running Tests
+## 🧪 Tests
 
-```
+```bash
+
+# or
 make test
 ```
 
 ---
 
-## 🧩 Architecture Highlight
+## 🧩 Architecture (Fan-In)
 
-The application follows a **Fan-In concurrency pattern**:
-
-1. **Dispatcher**
-   Reads input (CLI args or CSV) and dispatches URLs to workers.
-
-2. **Workers**
-   Each worker runs in its own Goroutine and performs an HTTP check independently.
-
-3. **Aggregator (Fan-In)**
-   All results are sent to a buffered channel.
-
-4. **Renderer**
-   The main routine collects results, sorts them by latency, and renders the final UI table.
-
-This approach ensures **high throughput**, **low latency**, and **clean separation of concerns**.
+1. Read input (arg or CSV) and fan out to goroutines
+2. Workers execute HTTP GET with timeout
+3. Results flow into a buffered channel (fan-in)
+4. Aggregate, sort by latency, and render a styled table
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License**.
+MIT License. See [LICENSE](LICENSE).
 
 ---
 
 Made with 💜 by **Caio Corrêa de Castro**
 
 ---
+
